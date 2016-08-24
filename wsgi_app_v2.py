@@ -17,8 +17,7 @@ class Root(object):
         return 'Hello {}!'.format(name).encode('utf8')
 
 app = ObjectPublisher(Root())
-wrapped_app = AuthMiddleware(app)
 
 if __name__ == '__main__':
     from paste import httpserver
-    httpserver.serve(wrapped_app, host='127.0.0.1', port='8080')
+    httpserver.serve(app, host='127.0.0.1', port='8080')
