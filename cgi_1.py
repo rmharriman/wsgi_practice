@@ -9,7 +9,7 @@ Modify the cgid mod in /etc/apache2/mods-enabled/cgid.conf
 Add these lines:
 
 # Directive tells Apache where cgi scripts are
-ScriptAlias "/cgi-bin/" "/srv/cgi-bin/"
+ScriptAlias "/cgi-bin/" "/var/www/html/cgi-bin/"
 
 
 <Directory "/srv/cgi-bin">
@@ -30,7 +30,7 @@ text = """Content-type: text/html
 <h1>A second CGI Script</h1>
 <HR>
 <p>Hello, CGI World!</p>
-<IMG src="http://localhost/ppsmall.gif" BORDER=1 ALT=[image]>
+<IMG src="../static/ppsmall.gif" BORDER=1 ALT=[image]>
 <HR>
 """
 
