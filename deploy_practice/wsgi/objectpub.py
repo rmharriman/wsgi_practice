@@ -38,7 +38,7 @@ class ObjectPublisher(object):
         obj = self.find_object(self.root, environ)
         response_body = obj(**dict(webinfo.request.fields))
         # Stock headers are now supplied in the Response init method
-        start_response('200 OK', webinfo.response.headers.items())
+        start_response('200 OK', [(v, k) for k, v in webinfo.response.headers.items()])
         return [response_body]
 
     def find_object(self, obj, environ):
