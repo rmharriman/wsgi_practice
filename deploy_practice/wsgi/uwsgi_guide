@@ -1,0 +1,18 @@
+Need to install uwsgi-plugin-python3
+socket permissions then need to be set to 777 (need to figure out better way to do this)
+Uwsgi command:
+uwsgi -s /tmp/app.sock --manage-script-name --mount /=wsgi_app_v2:app --plugin python3
+
+Nginx config (modified these lines in the default sites-enabled config (/etc/nginx/sites-enabled/default:
+
+ #root /var/www/html;
+
+# Serve app at root and pass all requests to the uwsgi socket
+location / {
+        try_files $uri @app;
+}
+
+location @app {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/app.sock;
+}
