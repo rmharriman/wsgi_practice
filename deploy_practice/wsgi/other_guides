@@ -1,0 +1,59 @@
+uWSGI and NGINX:
+Need to install uwsgi-plugin-python3
+socket permissions then need to be set to 777 (need to figure out better way to do this)
+Uwsgi command:
+uwsgi -s /tmp/app.sock --manage-script-name --mount /=wsgi_app_v2:app --plugin python3
+
+Nginx config (modified these lines in the default sites-enabled config (/etc/nginx/sites-enabled/default:
+
+ #root /var/www/html;
+
+# Serve app at root and pass all requests to the uwsgi socket
+location / {
+        try_files $uri @app;
+}
+
+location @app {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/app.sock;
+}
+
+
+Gunicorn and nginx:
+/usr/local/bin/gunicorn wsgi_app_v2:app
+
+nginx proxy pass used (changed default sites-enabled config):
+location / {
+                include proxy_params;
+                proxy_pass http://localhost:8000;
+        }
+
+Gevent (also used proxy pass - port 5000 this time):
+Need only add a gevent server file and run it:
+from gevent.wsgi import WSGIServer
+from wsgi_app_v2 import app
+
+http_server = WSGIServer(('', 5000), app)
+http_server.serve_forever()
+
+mod_wsgi:
+Place a config file in the apache sites-enabled directory to tell apache about the wsgi app
+Sample:
+<VirtualHost *:80>
+
+    WSGIDaemonProcess yourapplication user=rmharriman group=rmharriman threads=5
+    WSGIScriptAlias / /var/www/html/cgi-bin/app.wsgi
+
+    <Directory /var/www/html/cgi-bin>
+        WSGIProcessGroup yourapplication
+        WSGIApplicationGroup %{GLOBAL}
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+Create a wsgi file that receives calls (mapped above in the script alias):
+# Need to make sure instance of application is called application
+import sys
+sys.path.insert(0, '/var/www/html/cgi-bin')
+
+from wsgi_app_v2 import app as application

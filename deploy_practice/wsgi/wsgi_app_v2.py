@@ -6,12 +6,7 @@ class Root(object):
 
     # The "index" method:
     def __call__(self):
-        return b'''
-        <form action="welcome">
-        Name: <input type="text" name="name">
-        <input type="submit">
-        </form>
-        '''
+        return b'<form action="welcome"> Name: <input type="text" name="name"> <input type="submit"></form>'
 
     def welcome(self, name):
         return 'Hello {}!'.format(name).encode('utf8')
