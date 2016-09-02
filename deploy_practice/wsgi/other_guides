@@ -4,6 +4,11 @@ socket permissions then need to be set to 777 (need to figure out better way to 
 Uwsgi command:
 uwsgi -s /tmp/app.sock --manage-script-name --mount /=wsgi_app_v2:app --plugin python3
 
+app.ini and systemd.test_app.service are working examples of how to configure a systemd service
+# tricky part is there are 2 uwsgis installed! /usr/bin/uwsgi and /usr/local/bin/uwsgi
+
+
+
 Nginx config (modified these lines in the default sites-enabled config (/etc/nginx/sites-enabled/default:
 
  #root /var/www/html;
