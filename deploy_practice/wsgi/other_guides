@@ -1,3 +1,70 @@
+Circus + Chaussette + Meinheld:
+circus script:
+# Need to use python3 PR for web console: https://github.com/aadu/circus-web.git
+# Starts webconsole on port 8080
+# Chose Meinheld as backend over the default based on WSGIRef
+
+[circus]
+statsd = True
+httpd = True
+httpd_host = localhost
+httpd_port = 8080
+
+[watcher:webapp]
+uid = itrans
+working_dir = /srv/itrans
+virtualenv = /srv/itrans_venv
+copy_env = True
+cmd = /srv/itrans_venv/bin/chaussette --fd $(circus.sockets.web) paste:test.ini --backend meinheld
+numprocesses = 5
+use_sockets = True
+
+[socket:web]
+host = 0.0.0.0
+port = 9999
+
+
+# NGINX to handle static files and reverse proxy rest to application
+# copy to /etc/nginx/sites-enabled/
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        charset utf-8;
+
+        location /static {
+                alias /srv/itrans/itrans/static;
+        }
+
+        location / {
+                try_files $uri @app;
+        }
+
+        location @app {
+                include proxy_params;
+                proxy_pass http://localhost:9999                ;
+        }
+}
+
+# Systemd unit file to ensure app is brought back on restart
+# Place config file in /etc/cirucus
+# And add unit file to /etc/systemd/system/circus.service
+[Unit]
+Description=Circus process manager
+After=syslog.target network.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecReload=/usr/local/bin/circusctl reload
+ExecStart=/usr/local/bin/circusd /etc/circus/circus.ini
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+
+####################################################################################################
+
 uWSGI and NGINX:
 Need to install uwsgi-plugin-python3
 socket permissions then need to be set to 777 (need to figure out better way to do this)
